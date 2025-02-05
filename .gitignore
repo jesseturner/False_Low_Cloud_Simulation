@@ -1,0 +1,9 @@
+model_data/gfs*
+sst_data/sst_2*
+viirs_data/*
+*.jpg
+*.h5
+*.nc
+*.png
+nohup.out
+*.txt
