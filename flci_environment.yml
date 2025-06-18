@@ -1,0 +1,12 @@
+name: flci_environment
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - xarray
+  - matplotlib
+  - cartopy
+  - cfgrib
+  - pandas
+  - numpy
+  

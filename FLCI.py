@@ -1,12 +1,9 @@
-import xarray as xr
-import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
 import numpy as np
 import pandas as pd
-import matplotlib.colors as mcolors
-import cartopy.feature as feature
-import sys
-import time
+import xarray as xr
+import matplotlib.pyplot as plt, matplotlib.colors as mcolors
+import cartopy.crs as ccrs, cartopy.feature as feature
+import sys, time
 
 #--- Pass in date variable from FLCI_bulk.sh
 date_str = sys.argv[1]

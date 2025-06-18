@@ -1,7 +1,7 @@
 # False Low Cloud Simulation
 
 ## Overview
-* Code used in Turner et al., 2025 (DOI: TBD)
+* Code used in Turner et al., 2025 (DOI: 10.1029/2025GL115366)
 * Generates a model-driven simulation of an 11.2 um - 3.9 um satellite image
 * Cloud-free simulation displays potential false low cloud signals as positives
 
