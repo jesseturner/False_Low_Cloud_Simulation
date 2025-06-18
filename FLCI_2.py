@@ -27,8 +27,8 @@ def main():
 #=====================================================
 
 def setVariables():
-    date_str = sys.argv[1]
-    coordinate_box = [90, -90, -360, 0] # lat north, lat south, lon west, lon east
+    date_str = "20250612"
+    coordinate_box = [50, 24, -125, -66] # lat north, lat south, lon west, lon east
     region_name = "global"
 
     return date_str, coordinate_box, region_name
@@ -99,11 +99,9 @@ def getDimensions(optical_mass_ds):
 
 def initializeArrays(pressure_profile, lat_len, lon_len):
 
-    optical_thickness_07 = np.zeros([len(pressure_profile), lat_len, lon_len])
-    optical_thickness_13 = np.zeros([len(pressure_profile), lat_len, lon_len])
-    optical_thickness_14 = np.zeros([len(pressure_profile), lat_len, lon_len])
+    optical_thickness = np.zeros([len(pressure_profile), lat_len, lon_len])
 
-    return optical_thickness_07, optical_thickness_13, optical_thickness_14
+    return optical_thickness
 
 #-----------------------------------------------------
 
@@ -118,8 +116,8 @@ def extractSlices(optical_mass_ds):
 def nearestTempPress(mass_ext_df, temperatures, pressure_profile, lat_len, lon_len):
     
     # Pre-calculate nearest temperature and pressure indices for all bands
-    nearest_temp_indices_07 = np.argmin((mass_ext_df.index.values[:, None] - temperatures.flatten())**2, axis=0)
-    nearest_pressure_indices_07 = np.argmin((mass_ext_df.columns.values[:, None] - pressure_profile)**2, axis=0)
+    nearest_temp_indices = np.argmin((mass_ext_df.index.values[:, None] - temperatures.flatten())**2, axis=0)
+    nearest_pressure_indices = np.argmin((mass_ext_df.columns.values[:, None] - pressure_profile)**2, axis=0)
 
     # Reshape indices to match the dimensions of temperatures
     nearest_temp_indices = nearest_temp_indices.reshape((len(pressure_profile), lat_len, lon_len))
@@ -129,10 +127,23 @@ def nearestTempPress(mass_ext_df, temperatures, pressure_profile, lat_len, lon_l
 
 #-----------------------------------------------------
 
+def calcOpticalThickness(x, y, z, optical_masses, mass_ext_df, nearest_temp_indices, nearest_pressure_indices, optical_thickness):
+
+    optical_mass_value = optical_masses[z, y, x]
+    # Lookup the mass extinction values using pre-calculated indices
+    mass_ext_value = mass_ext_df.iloc[nearest_temp_indices[z, y, x], nearest_pressure_indices[z]]
+    optical_thickness[z, y, x] = optical_mass_value * mass_ext_value
+
+    return optical_thickness
+
+#-----------------------------------------------------
+
 def iterateGridPoints(pressure_profile, lat_len, lon_len, optical_masses, temperatures, 
                       mass_ext_df_07, mass_ext_df_13, mass_ext_df_14):
     
-    optical_thickness_07, optical_thickness_13, optical_thickness_14 = initializeArrays(pressure_profile, lat_len, lon_len)
+    optical_thickness_07 = initializeArrays(pressure_profile, lat_len, lon_len)
+    optical_thickness_13 = initializeArrays(pressure_profile, lat_len, lon_len)
+    optical_thickness_14 = initializeArrays(pressure_profile, lat_len, lon_len)
     
     nearest_temp_indices_07, nearest_pressure_indices_07 = nearestTempPress(mass_ext_df_07, temperatures, pressure_profile, lat_len, lon_len)
     nearest_temp_indices_13, nearest_pressure_indices_13 = nearestTempPress(mass_ext_df_13, temperatures, pressure_profile, lat_len, lon_len)
@@ -144,18 +155,20 @@ def iterateGridPoints(pressure_profile, lat_len, lon_len, optical_masses, temper
 
         print(f"Processing pressure_profile[{z}] = {pressure_profile[z]}")
         for y in range(lat_len):
-            for x in range(lon_len):            
-                optical_mass_value = optical_masses[z, y, x]
+            for x in range(lon_len):
 
-                # Lookup the mass extinction values using pre-calculated indices
-                mass_ext_value_07 = mass_ext_df_07.iloc[nearest_temp_indices_07[z, y, x], nearest_pressure_indices_07[z]]
-                optical_thickness_07[z, y, x] = optical_mass_value * mass_ext_value_07
-
-                mass_ext_value_13 = mass_ext_df_13.iloc[nearest_temp_indices_13[z, y, x], nearest_pressure_indices_13[z]]
-                optical_thickness_13[z, y, x] = optical_mass_value * mass_ext_value_13
-
-                mass_ext_value_14 = mass_ext_df_14.iloc[nearest_temp_indices_14[z, y, x], nearest_pressure_indices_14[z]]
-                optical_thickness_14[z, y, x] = optical_mass_value * mass_ext_value_14
+                optical_thickness_07 = calcOpticalThickness(x, y, z, optical_masses, 
+                                                            mass_ext_df_07, nearest_temp_indices_07, 
+                                                            nearest_pressure_indices_07, optical_thickness_07)
+                
+                optical_thickness_13 = calcOpticalThickness(x, y, z, optical_masses, 
+                                                            mass_ext_df_13, nearest_temp_indices_13, 
+                                                            nearest_pressure_indices_13, optical_thickness_13)
+                
+                optical_thickness_14 = calcOpticalThickness(x, y, z, optical_masses, 
+                                                            mass_ext_df_14, nearest_temp_indices_14, 
+                                                            nearest_pressure_indices_14, optical_thickness_14)
+            
         
         print("Calculation progress: "+str(z)+"/12")
 
