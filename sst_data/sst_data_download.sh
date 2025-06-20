@@ -1,10 +1,19 @@
 for date in 20250612
 
 do 
-	#--- SST is only tracked once per day, so no time variable
-    sst_path=https://www.ncei.noaa.gov/data/sea-surface-temperature-optimum-interpolation/v2.1/access/avhrr/${date:0:6}/oisst-avhrr-v02r01."$date".nc
+    base_url="https://www.ncei.noaa.gov/data/sea-surface-temperature-optimum-interpolation/v2.1/access/avhrr"
+    year_month=${date:0:6}
 
-    wget --no-check-certificate -O sst_data/sst_$date $sst_path
-    echo "SST collected for "$date
+    # SST is only tracked once per day, so no time variable
+    std_file="oisst-avhrr-v02r01.${date}.nc"
+    prelim_file="oisst-avhrr-v02r01.${date}_preliminary.nc"
+    out_file="sst_data/sst_$date"
 
+    wget --no-check-certificate -O "$out_file" "$base_url/$year_month/$std_file" || \
+    wget --no-check-certificate -O "$out_file" "$base_url/$year_month/$prelim_file" || {
+        echo "Error: Could not download SST file for $date (standard or preliminary)."
+        exit 1
+    }
+
+    echo "SST collected for $date"
 done
