@@ -3,7 +3,7 @@ import pandas as pd
 import xarray as xr
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs, cartopy.feature as feature
-import sys, time
+import time
 
 #=====================================================
 
@@ -138,16 +138,12 @@ def calcOpticalThickness(x, y, z, optical_masses, mass_ext_df, nearest_temp_indi
 
 #-----------------------------------------------------
 
-def iterateGridPoints(pressure_profile, lat_len, lon_len, optical_masses, temperatures, 
-                      mass_ext_df_07, mass_ext_df_13, mass_ext_df_14):
+def iterateGridPoints(pressure_profile, lat_len, lon_len, 
+                      optical_masses, temperatures, mass_ext_df):
     
-    optical_thickness_07 = initializeArrays(pressure_profile, lat_len, lon_len)
-    optical_thickness_13 = initializeArrays(pressure_profile, lat_len, lon_len)
-    optical_thickness_14 = initializeArrays(pressure_profile, lat_len, lon_len)
+    optical_thickness = initializeArrays(pressure_profile, lat_len, lon_len)
     
-    nearest_temp_indices_07, nearest_pressure_indices_07 = nearestTempPress(mass_ext_df_07, temperatures, pressure_profile, lat_len, lon_len)
-    nearest_temp_indices_13, nearest_pressure_indices_13 = nearestTempPress(mass_ext_df_13, temperatures, pressure_profile, lat_len, lon_len)
-    nearest_temp_indices_14, nearest_pressure_indices_14 = nearestTempPress(mass_ext_df_14, temperatures, pressure_profile, lat_len, lon_len)
+    nearest_temp_indices, nearest_pressure_indices = nearestTempPress(mass_ext_df, temperatures, pressure_profile, lat_len, lon_len)
     
     # Iterate through the grid points
     # Only doing up to 550hPa, in order to speed things up
@@ -157,22 +153,14 @@ def iterateGridPoints(pressure_profile, lat_len, lon_len, optical_masses, temper
         for y in range(lat_len):
             for x in range(lon_len):
 
-                optical_thickness_07 = calcOpticalThickness(x, y, z, optical_masses, 
-                                                            mass_ext_df_07, nearest_temp_indices_07, 
-                                                            nearest_pressure_indices_07, optical_thickness_07)
-                
-                optical_thickness_13 = calcOpticalThickness(x, y, z, optical_masses, 
-                                                            mass_ext_df_13, nearest_temp_indices_13, 
-                                                            nearest_pressure_indices_13, optical_thickness_13)
-                
-                optical_thickness_14 = calcOpticalThickness(x, y, z, optical_masses, 
-                                                            mass_ext_df_14, nearest_temp_indices_14, 
-                                                            nearest_pressure_indices_14, optical_thickness_14)
+                optical_thickness = calcOpticalThickness(x, y, z, optical_masses, 
+                                                            mass_ext_df, nearest_temp_indices, 
+                                                            nearest_pressure_indices, optical_thickness)
             
         
         print("Calculation progress: "+str(z)+"/12")
 
-    return optical_thickness_07, optical_thickness_13, optical_thickness_14
+    return optical_thickness
 
 #-----------------------------------------------------
 
@@ -189,9 +177,12 @@ def createOpticalThicknessTable(date_str, optical_mass_ds, mass_ext_df_07, mass_
 
     start_time = time.time()
 
-    optical_thickness_07, optical_thickness_13, optical_thickness_14 = iterateGridPoints(
-                      pressure_profile, lat_len, lon_len, optical_masses, temperatures,
-                      mass_ext_df_07, mass_ext_df_13, mass_ext_df_14)
+    optical_thickness_07 = iterateGridPoints(pressure_profile, lat_len, lon_len, 
+                                             optical_masses, temperatures, mass_ext_df_07)
+    optical_thickness_13 = iterateGridPoints(pressure_profile, lat_len, lon_len, 
+                                             optical_masses, temperatures, mass_ext_df_13)
+    optical_thickness_14 = iterateGridPoints(pressure_profile, lat_len, lon_len, 
+                                             optical_masses, temperatures, mass_ext_df_14)
                 
 
     loop_time = time.time() - start_time
@@ -280,9 +271,9 @@ def setWavelengths():
         
     # Setting wavelengths for BTD
     first_wl = 11.2e-6
-    first_wl_str = str(first_wl*1e6).replace(".", "_")
+    # first_wl_str = str(first_wl*1e6).replace(".", "_")
     second_wl = 3.9e-6
-    second_wl_str = str(second_wl*1e6).replace(".", "_")
+    # second_wl_str = str(second_wl*1e6).replace(".", "_")
 
     return first_wl, second_wl
 
