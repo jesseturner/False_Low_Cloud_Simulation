@@ -26,7 +26,7 @@ def main():
 #=====================================================
 
 def setVariables():
-    date_str = "20250612"
+    date_str = "20250619"
     coordinate_box = [61, 30, -80, -25] # lat north, lat south, lon west (min -360), lon east (max 0)
     region_name = "north_atlantic"
     
