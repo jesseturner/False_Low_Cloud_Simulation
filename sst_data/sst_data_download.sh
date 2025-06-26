@@ -1,4 +1,4 @@
-for date in 20250618 20250619
+for date in 20250625
 
 do 
     base_url="https://www.ncei.noaa.gov/data/sea-surface-temperature-optimum-interpolation/v2.1/access/avhrr"

@@ -26,7 +26,7 @@ def main():
 #=====================================================
 
 def setVariables():
-    date_str = "20250619"
+    date_str = "20250625"
     coordinate_box = [61, 30, -80, -25] # lat north, lat south, lon west (min -360), lon east (max 0)
     region_name = "north_atlantic"
     
@@ -309,7 +309,7 @@ def plotFigure(gfs_region, BTD, first_wl, second_wl, datetime_str, region_name, 
     
     output_dir = "composite/images/"
     os.makedirs(output_dir, exist_ok=True)
-    fig.savefig(output_dir+region_name+"_"+date_str, dpi=200, bbox_inches='tight')
+    fig.savefig(f'{output_dir}{region_name}_{date_str}', dpi=200, bbox_inches='tight')
 
     return
 
@@ -325,7 +325,7 @@ def saveAsNetCDF(BTD, gfs_region, region_name, date_str):
             "longitude": gfs_region.longitude
         }
     )
-    output_dir = "composite/region_name/"
+    output_dir = f'composite/{region_name}/'
     os.makedirs(output_dir, exist_ok=True)
     btd_ds.to_netcdf(output_dir+region_name+"_"+date_str+".nc")
     print("Successfully saved netCDF for "+date_str)

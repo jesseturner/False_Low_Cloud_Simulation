@@ -1,6 +1,6 @@
 #! /usr/bin/bash
 
-for date in 20250618 20250619
+for date in 20250625
 
 do 
 	#--- must be 00z, 06z, 12z, 18z
